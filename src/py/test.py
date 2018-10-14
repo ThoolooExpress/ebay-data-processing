@@ -1,3 +1,4 @@
+# Module:                     
 # File:                       app.py
 # Purpose:                    entry point for ebay data processing application
 # Author:                     Richard G. Morrill
@@ -10,22 +11,14 @@
 
 import sqlite3
 from sqlite3 import OperationalError
+import sqlExecFile;
 
-# Get the sql query file
-fd = open('../sql/init.sql','r')
-init_sql = fd.read()
-fd.close()
-# Break it into commands
-sqlCommands = init_sql.split(';')
+# r:                          runs sql from a file
+r=sqlExecFile.sqlExecFile
 
 # Set up database connection
 conn = sqlite3.connect('../../tmp/ebay_data.db')
 c = conn.cursor()
 
-# Run all the commands in the file
-
-for command in sqlCommands:
-  try:
-    c.execute(command)
-  except(OperationalError, msg):
-    print("Error in command: ", msg)
+# Run query
+r(c,'../sql/init.sql')
