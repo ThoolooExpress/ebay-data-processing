@@ -11,7 +11,7 @@ def sqlExecFile(c,fileName):
   # @param fileName:            The file to source sql queries from
 
   # Read File
-  fd = open('../sql/init.sql','r')
+  fd = open(fileName,'r')
   init_sql = fd.read()
   fd.close()
 
