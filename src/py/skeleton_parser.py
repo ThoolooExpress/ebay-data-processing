@@ -75,7 +75,7 @@ Items (ItemID, SellerID, Name, Buy_Price, First_Bid, Currently,
 Number_of_Bids, Started, Ends, Description)
 """
 def parseItem(dictionary):
-    with open("items.dat", "a") as f:
+    with open("../../tmp/items.dat", "a") as f:
         item = []
         item.append(dictionary["ItemID"])
         item.append(dictionary["Seller"]["UserID"])
@@ -95,7 +95,7 @@ Schema of User table is
 User (UserID, Rating, Location, Country)
 """
 def parseUser(dictionary):
-    with open("users.dat", "a") as f:
+    with open("../../tmp/users.dat", "a") as f:
         bids = dictionary.get("Bids")
         users = set()
         if bids != None:
@@ -122,7 +122,7 @@ Schema of Categories table is
 Categories (ItemID, Category)
 """
 def parseCategory(dictionary):
-    with open("category.dat", "a") as f:
+    with open("../../tmp/category.dat", "a") as f:
         category = ["|".join([dictionary["ItemID"], c]) \
                     for c in dictionary.get("Category")]
 
@@ -134,7 +134,7 @@ Schema of Bids table is
 Bids (ItemID, UserID, Time, Amount)
 """
 def parseBids(dictionary):
-    with open("bids.dat", "a") as f:
+    with open("../../tmp/bids.dat", "a") as f:
         bids = dictionary.get("Bids")
         if bids != None:
             for bid in bids:
@@ -177,7 +177,7 @@ def main(argv):
     for f in argv[1:]:
         if isJson(f):
             parseJson(f)
-            print "Success parsing " + f
+            print("Success parsing " + f)
 
 if __name__ == '__main__':
     main(sys.argv)
