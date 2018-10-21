@@ -89,21 +89,20 @@ Items (ItemID, SellerID, Name, Buy_Price, First_Bid, Currently,
 Number_of_Bids, Started, Ends, Description)
 """
 def parseItem(dictionary,cur):
-  with open("../../tmp/items.dat", "a") as f:
-    itemID = dictionary["ItemID"]
-    # dictionary["Seller"]["UserID"] This will go with listing
-    name = dictionary["Name"]
-    # transformDollar(dictionary.get("Buy_Price", "NULL")) This will go with listing
-    # transformDollar(dictionary["First_Bid"])
-    # transformDollar(dictionary["Currently"])
-    # dictionary["Number_of_Bids"]
-    # transformDttm(dictionary["Started"])
-    # transformDttm(dictionary["Ends"])
-    description = dictionary["Description"]
-    cur.execute('''
-      INSERT OR IGNORE INTO 'item' (itemID,name,description)
-      VALUES (?,?,?);
-    ''', [itemID,name,description])
+  itemID = dictionary["ItemID"]
+  # dictionary["Seller"]["UserID"] This will go with listing
+  name = dictionary["Name"]
+  # transformDollar(dictionary.get("Buy_Price", "NULL")) This will go with listing
+  # transformDollar(dictionary["First_Bid"])
+  # transformDollar(dictionary["Currently"])
+  # dictionary["Number_of_Bids"]
+  # transformDttm(dictionary["Started"])
+  # transformDttm(dictionary["Ends"])
+  description = dictionary["Description"]
+  cur.execute('''
+    INSERT OR IGNORE INTO 'item' (itemID,name,description)
+    VALUES (?,?,?);
+  ''', [itemID,name,description])
     
 
 def addUser(userID,rating,cur):
@@ -120,12 +119,8 @@ def addUser(userID,rating,cur):
 
 # END addUser
 
-
-"""
-Schema of User table is
-User (UserID, Rating, Location, Country)
-"""
 def parseUser(dictionary,cur):
+  # Purpose:                    Parses in users
   bids = dictionary.get("Bids")
   if bids != None:
     for bid in bids:
@@ -150,13 +145,23 @@ def parseUser(dictionary,cur):
 Schema of Categories table is
 Categories (ItemID, Category)
 """
-# def parseCategory(dictionary):
-#     with open("../../tmp/category.dat", "a") as f:
-#         category = ["|".join([dictionary["ItemID"], c]) \
-#                     for c in dictionary.get("Category")]
-
-#         f.write("\n".join(category))
-#         f.write("\n")
+def parseCategory(dictionary,cur):
+  # Purpose:                      Constructs a list of unique categories, then
+  #                               links each item with its revevant category
+  # First try and add all the relevant categories, if they aren't already
+  # in the database
+  for c in dictionary.get("Category"):
+    cur.execute('''
+      INSERT OR IGNORE INTO category (name)
+      VALUES (?);
+    ''', [c])
+    print(dictionary['ItemID'])
+    cur.execute('''
+      INSERT OR IGNORE INTO inCategory(itemID,catID)
+      VALUES (?1,(SELECT catID FROM category WHERE name = ?2 LIMIT 1));
+    ''', [dictionary['ItemID'],c])
+  
+  # Now link it up with the items
 
 """
 Schema of Bids table is
@@ -180,10 +185,8 @@ item in the data set. Your job is to extend this functionality to create all
 of the necessary SQL tables for your database.
 """
 def parseJson(json_file):
-  print("parseJson exec")
   with ExitStack() as stack:
     f = stack.enter_context(open(json_file, 'r'))
-    print("NOW PARSINg")
     conn = stack.enter_context(sqlite3.connect("../../tmp/ebay-data.db"))
     items = loads(f.read())['Items']
     cur = conn.cursor()
@@ -196,8 +199,9 @@ def parseJson(json_file):
       the SQL tables based on your relation design
       """
       parseItem(item,cur)
+      parseCategory(item, cur)
       parseUser(item, cur)
-      # parseCategory(item)
+
       # parseBids(item)
 
     cur.execute("COMMIT;")

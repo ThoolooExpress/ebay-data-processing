@@ -77,18 +77,20 @@ CREATE TABLE "item" (
 --   price INTEGER --                the bid price, in whole cents
 -- );
 
--- CREATE TABLE category (
---   -- Stores each category
---   name TEXT UNIQUE, --            the name of the category
---   catID INTEGER PRIMARY KEY --    sqlite3 alias for ROWID
--- );
+CREATE TABLE "category" (
+  -- Stores each category
+  name TEXT UNIQUE, --            the name of the category
+  catID INTEGER PRIMARY KEY --    sqlite3 alias for ROWID
+);
 
--- CREATE TABLE inCategory (
---   -- Records that an item is in a category
---   itemID INTEGER,
---   FOREIGN KEY(itemID) REFERENCES "item"(itemID),
---   catID INTEGER,
---   FOREIGN KEY(catID) REFERENCES "category"(catID),
+CREATE TABLE "inCategory" (
+  -- Records that an item is in a category
+  catID INTEGER,
+  itemID INTEGER,
+  CONSTRAINT itemID
+  FOREIGN KEY(itemID) REFERENCES "item"(itemID),
+  CONSTRAINT catID
+  FOREIGN KEY(catID) REFERENCES "category"(catID),
 
---   PRIMARY KEY (itemID, catID)
--- )
+  PRIMARY KEY (itemID, catID)
+)
