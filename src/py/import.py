@@ -88,21 +88,23 @@ Schema of Item table is
 Items (ItemID, SellerID, Name, Buy_Price, First_Bid, Currently,
 Number_of_Bids, Started, Ends, Description)
 """
-# def parseItem(dictionary):
-#     with open("../../tmp/items.dat", "a") as f:
-#         item = []
-#         item.append(dictionary["ItemID"])
-#         item.append(dictionary["Seller"]["UserID"])
-#         item.append(escapeQuote(dictionary["Name"]))
-#         item.append(transformDollar(dictionary.get("Buy_Price", "NULL")))
-#         item.append(transformDollar(dictionary["First_Bid"]))
-#         item.append(transformDollar(dictionary["Currently"]))
-#         item.append(dictionary["Number_of_Bids"])
-#         item.append(transformDttm(dictionary["Started"]))
-#         item.append(transformDttm(dictionary["Ends"]))
-#         item.append(escapeQuote(dictionary["Description"]))
-#         f.write("|".join(map(lambda s: s or "", item)))
-#         f.write("\n")
+def parseItem(dictionary,cur):
+  with open("../../tmp/items.dat", "a") as f:
+    itemID = dictionary["ItemID"]
+    # dictionary["Seller"]["UserID"] This will go with listing
+    name = dictionary["Name"]
+    # transformDollar(dictionary.get("Buy_Price", "NULL")) This will go with listing
+    # transformDollar(dictionary["First_Bid"])
+    # transformDollar(dictionary["Currently"])
+    # dictionary["Number_of_Bids"]
+    # transformDttm(dictionary["Started"])
+    # transformDttm(dictionary["Ends"])
+    description = dictionary["Description"]
+    cur.execute('''
+      INSERT OR IGNORE INTO 'item' (itemID,name,description)
+      VALUES (?,?,?);
+    ''', [itemID,name,description])
+    
 
 def addUser(userID,rating,cur):
   # Purpose:                            Adds a use to the database
@@ -193,7 +195,7 @@ def parseJson(json_file):
       given `json_file' and generate the necessary .dat files to generate
       the SQL tables based on your relation design
       """
-      # parseItem(item)
+      parseItem(item,cur)
       parseUser(item, cur)
       # parseCategory(item)
       # parseBids(item)

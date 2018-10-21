@@ -32,14 +32,16 @@ CREATE TABLE "user" (
   rating INTEGER  --              the user's rating
 );
 
--- CREATE TABLE "item" (
---   -- Stores each unique item.  Even if the same item is listed by
---   -- different sellers at different times, it is still the same item
+CREATE TABLE "item" (
+  -- Stores each unique item.  Even if the same item is listed by
+  -- different sellers at different times, it is still the same item
 
---   itemID INTEGER PRIMARY KEY, --  unique item identifier
---   name TEXT, --                   the user-friendly name of the item
---   description TEXT  --            a more complete description of the item
--- );
+  itemID INTEGER PRIMARY KEY, --  unique item identifier
+  name TEXT, --                   the user-friendly name of the item
+  description TEXT --            a more complete description of the item
+  -- location TEXT, --               the item's location
+  -- country TEXT --                 the country the item is located in
+);
 
 -- CREATE TABLE "listing" (
 --   -- Stores each listing, which "lists" a single "item", and is "posted"
