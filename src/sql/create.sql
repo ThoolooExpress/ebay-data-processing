@@ -29,12 +29,7 @@ CREATE TABLE "user" (
   -- Stores each user
 
   userID TEXT PRIMARY KEY, --     the user's unique username
-  rating INTEGER, --              the user's rating
-  location TEXT, --               the user's location.  note that there isn't
-  --                              any specific format or validation, this is
-  --                              actually just whatever the user decides to
-  --                              put in the box when they register
-  country TEXT --                 the user's country
+  rating INTEGER  --              the user's rating
 );
 
 -- CREATE TABLE "item" (

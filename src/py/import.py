@@ -104,19 +104,17 @@ Number_of_Bids, Started, Ends, Description)
 #         f.write("|".join(map(lambda s: s or "", item)))
 #         f.write("\n")
 
-def addUser(userID,rating,location,country,cur):
+def addUser(userID,rating,cur):
   # Purpose:                            Adds a use to the database
   # Precondition:                       cur must be a valid sqlite3 database
   #                                     cursor, and the preceding arguments
   #                                     must make up a valid user profile
   cur.execute(
-    """INSERT OR IGNORE INTO 'user' (userID,rating,location,country)
-       VALUES (?,?,?,?);
+    """INSERT OR IGNORE INTO 'user' (userID,rating)
+       VALUES (?,?);
     """,
     [userID,
-    rating,
-    location,
-    country])
+    rating])
 
 # END addUser
 
@@ -132,15 +130,19 @@ def parseUser(dictionary,cur):
       bidder = bid["Bid"]["Bidder"]
       userID = bidder["UserID"]
       rating = bidder["Rating"]
-      location = escapeQuote(bidder.get("Location", "NULL"))
-      country = escapeQuote(bidder.get("Country", "NULL"))
-      addUser(userID,rating,location,country,cur)
+      
+      # location = escapeQuote(bidder.get("Location", "NULL"))
+      
+      # country = escapeQuote(bidder.get("Country", "NULL"))
+      addUser(userID,rating,cur)
 
   userID = dictionary["Seller"]["UserID"]
+  # print(userID);
   rating = dictionary["Seller"]["Rating"]
-  location = escapeQuote(dictionary.get("Location", "NULL"))
-  country = escapeQuote(dictionary.get("Country", "NULL"))
-  addUser(userID,rating,location,country,cur)
+  # location = escapeQuote(dictionary.get("Location", "NULL"))
+  # print(location)
+  # country = escapeQuote(dictionary.get("Country", "NULL"))
+  addUser(userID,rating,cur)
 
 """
 Schema of Categories table is
