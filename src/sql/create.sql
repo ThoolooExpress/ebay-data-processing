@@ -56,25 +56,27 @@ CREATE TABLE "bids" (
   userID TEXT, --                 the user bidding on the item
 
 
-  listingID INTEGER, --           the listing that has been bid on
+  itemID INTEGER, --           the listing that has been bid on
 
 
   "time" INTEGER, --              the date/time the bid was placed
 
   price INTEGER, --                the bid price, in whole cents
 
-  CONSTRAINT listingID
-  FOREIGN KEY (listingID) REFERENCES "listing"(listingID),
+  CONSTRAINT itemID
+  FOREIGN KEY (itemID) REFERENCES "item"(itemID),
   CONSTRAINT userID
   FOREIGN KEY (userID) REFERENCES "user"(userID),
 
-  PRIMARY KEY (userID,listingID,"time") -- A given user may only place one bid
+  PRIMARY KEY (userID,itemID,"time") -- A given user may only place one bid
                                         -- on a given listing, at a given time,
                                         -- hence this is our primary key
 
 -- Note:  A user could theoretically place multiple bids at the same time due to
 --        network latency, or that multiple users could be recorded bidding at
---        the exact same time, for the same reason
+--        the exact same time, for the same reason.  In fact, it is a litle
+--        rediculous to imagine only recording times to the nearest second in
+--        an application like this.
 );
 
 CREATE TABLE "category" (

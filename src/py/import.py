@@ -172,17 +172,17 @@ def parseCategory(dictionary,cur):
 Schema of Bids table is
 Bids (ItemID, UserID, Time, Amount)
 """
-# def parseBids(dictionary):
-#     with open("../../tmp/bids.dat", "a") as f:
-#         bids = dictionary.get("Bids")
-#         if bids != None:
-#             for bid in bids:
-#                 info = []
-#                 info.append(dictionary["ItemID"])
-#                 info.append(bid["Bid"]["Bidder"]["UserID"])
-#                 info.append(transformDttm(bid["Bid"]["Time"]))
-#                 info.append(transformDollar(bid["Bid"]["Amount"]))
-#                 f.write("|".join(info) + "\n")
+def parseBids(dictionary,cur):
+  bids = dictionary.get("Bids")
+  if bids != None:
+    for bid in bids:
+      itemID = dictionary["ItemID"]
+      userID = bid["Bid"]["Bidder"]["UserID"]
+      bidTime = transformDttm(bid["Bid"]["Time"])
+      price = transformDollar(bid["Bid"]["Amount"])
+      cur.execute(''' INSERT INTO bids (itemID,userID,"time",price)
+                      VALUES (?,?,?,?);
+   ''',[itemID,userID,bidTime,price])
 
 """
 Parses a single json file. Currently, there's a loop that iterates over each
@@ -206,8 +206,7 @@ def parseJson(json_file):
       parseItem(item,cur)
       parseCategory(item, cur)
       parseUser(item, cur)
-
-      # parseBids(item)
+      parseBids(item,cur)
 
     cur.execute("COMMIT;")
 
