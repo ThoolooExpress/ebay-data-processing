@@ -189,13 +189,10 @@ Parses a single json file. Currently, there's a loop that iterates over each
 item in the data set. Your job is to extend this functionality to create all
 of the necessary SQL tables for your database.
 """
-def parseJson(json_file):
+def parseJson(json_file,cur):
   with ExitStack() as stack:
     f = stack.enter_context(open(json_file, 'r'))
-    conn = stack.enter_context(sqlite3.connect("../../tmp/ebay-data.db"))
     items = loads(f.read())['Items']
-    cur = conn.cursor()
-    r(cur,"../sql/create.sql")
     cur.execute("BEGIN TRANSACTION;") 
     for item in items:
       """
@@ -220,9 +217,13 @@ def main(argv):
     print >> sys.stderr, 'Usage: python skeleton_json_parser.py <path to json files>'
     sys.exit(1)
       # loops over all .json files in the argument
+  # Initialize DB
+  conn = sqlite3.connect("../../tmp/ebay-data.db")
+  cur = conn.cursor()
+  r(cur,"../sql/create.sql")
   for f in argv[1:]:
     if isJson(f):
-      parseJson(f)
+      parseJson(f,cur)
       print("Success parsing " + f)
 
 if __name__ == '__main__':
