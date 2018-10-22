@@ -38,44 +38,44 @@ CREATE TABLE "item" (
 
   itemID INTEGER PRIMARY KEY, --  unique item identifier
   name TEXT, --                   the user-friendly name of the item
-  description TEXT --            a more complete description of the item
-  -- location TEXT, --               the item's location
-  -- country TEXT --                 the country the item is located in
+  description TEXT, --            a more complete description of the item
+  location TEXT, --               the item's location
+  country TEXT, --                the country the item is located in
+  buyPrice INTEGER, --            buy it now price, in whole cents
+  firstBid INTEGER, --            first bid price, in whole cents
+  starts TEXT, --              auction start date/time
+  ends INTEGER, --                auction end date/time
+  sellerUserID TEXT, --            the seller of this item
+  CONSTRAINT sellerUserID
+  FOREIGN KEY(sellerUserID) REFERENCES "user"(userID)
 );
 
--- CREATE TABLE "listing" (
---   -- Stores each listing, which "lists" a single "item", and is "posted"
---   -- by a single "user"
+CREATE TABLE "bids" (
+  -- Records each bid, by one user on one item
 
---   buyPrice INTEGER, --            buy it now price, in whole cents
---   firstBid INTEGER, --            first bid price, in whole cents
---   starts INTEGER, --              auction start date/time
---   ends INTEGER, --                auction end date/time
+  userID TEXT, --                 the user bidding on the item
 
---   itemID INTEGER, --              the item being listed
---   FOREIGN KEY(itemID) REFERENCES "item"(itemID),
 
---   sellerUserID TEXT, --            the seller of this item
---   FOREIGN KEY(sellerUserID) REFERENCES "user"(userID),
+  listingID INTEGER, --           the listing that has been bid on
 
---   listingID INTEGER PRIMARY KEY -- this is an sqlite3 alias for ROWID, this
---   --                               makes it easier for other tables to refenerce
---   --                               this one
--- );
 
--- CREATE TABLE "bids" (
---   -- Records each bid, by one user on one item
+  "time" INTEGER, --              the date/time the bid was placed
 
---   userID TEXT, --                 the user bidding on the item
---   FOREIGN KEY (userID) REFERENCES "user"(userID),
+  price INTEGER, --                the bid price, in whole cents
 
---   listingID INTEGER, --           the listing that has been bid on
---   FOREIGN KEY (listingID) REFERENCES "listing"(listingID),
+  CONSTRAINT listingID
+  FOREIGN KEY (listingID) REFERENCES "listing"(listingID),
+  CONSTRAINT userID
+  FOREIGN KEY (userID) REFERENCES "user"(userID),
 
---   "time" INTEGER, --              the date/time the bid was placed
+  PRIMARY KEY (userID,listingID,"time") -- A given user may only place one bid
+                                        -- on a given listing, at a given time,
+                                        -- hence this is our primary key
 
---   price INTEGER --                the bid price, in whole cents
--- );
+-- Note:  A user could theoretically place multiple bids at the same time due to
+--        network latency, or that multiple users could be recorded bidding at
+--        the exact same time, for the same reason
+);
 
 CREATE TABLE "category" (
   -- Stores each category

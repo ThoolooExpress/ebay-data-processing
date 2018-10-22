@@ -35,6 +35,7 @@ from re import sub
 import sqlite3
 import sqlExecFile
 from contextlib import ExitStack
+import time
 
 r = sqlExecFile.sqlExecFile
 
@@ -59,24 +60,24 @@ def transformMonth(mon):
   else:
     return mon
 
-"""
-Transforms a timestamp from Mon-DD-YY HH:MM:SS to YYYY-MM-DD HH:MM:SS
-"""
-def transformDttm(dttm):
-  dttm = dttm.strip().split(' ')
-  dt = dttm[0].split('-')
-  date = '20' + dt[2] + '-'
-  date += transformMonth(dt[0]) + '-' + dt[1]
-  return date + ' ' + dttm[1]
 
-"""
-Transform a dollar value amount from a string like $3,453.23 to XXXXX.xx
-"""
+def transformDttm(dttm):
+  # Purpose:                Converts time to UNIX timestamp
+  ds = time.strptime(dttm, "%b-%d-%y %H:%M:%S")
+  return time.mktime(ds)
+
 
 def transformDollar(money):
+  # Purpose:                Convert a dollar ammount string like "$XXX.xx"
+  #                         integer number of cents
   if money == None or len(money) == 0 or money == "NULL":
     return money
-    return sub(r'[^\d.]', '', money)
+
+  # Easier to understand than regexes
+  return int(money.replace("$","").replace(",","").replace(".",""))
+  # return int(sub ('.', '',   # This is a lot clearer than regexes
+  #   sub('$', '', money)
+  # )) * 100
 
 def escapeQuote(string):
   if string == None:
@@ -90,20 +91,25 @@ Number_of_Bids, Started, Ends, Description)
 """
 def parseItem(dictionary,cur):
   itemID = dictionary["ItemID"]
-  # dictionary["Seller"]["UserID"] This will go with listing
   name = dictionary["Name"]
-  # transformDollar(dictionary.get("Buy_Price", "NULL")) This will go with listing
-  # transformDollar(dictionary["First_Bid"])
-  # transformDollar(dictionary["Currently"])
-  # dictionary["Number_of_Bids"]
-  # transformDttm(dictionary["Started"])
-  # transformDttm(dictionary["Ends"])
   description = dictionary["Description"]
+  # Moved these fields to the item, because on the actual ebay site, you set
+  # the item location for each listing, it's not associated with the seller's
+  # account
+  location = dictionary["Location"]
+  country = dictionary["Country"]
+  buyPrice = transformDollar(dictionary.get("Buy_Price", "NULL"))
+  firstBid = transformDollar(dictionary["First_Bid"])
+  starts = transformDttm(dictionary["Started"])
+  ends = transformDttm(dictionary["Ends"])
+  sellerUserId = dictionary["Seller"]["UserID"]
   cur.execute('''
-    INSERT OR IGNORE INTO 'item' (itemID,name,description)
-    VALUES (?,?,?);
-  ''', [itemID,name,description])
-    
+    INSERT OR IGNORE INTO 'item' (itemID,name,description,location,country,
+                                  buyPrice,firstBid,starts,ends,sellerUserId)
+    VALUES (?,?,?,?,?,?,?,?,?,?);
+  ''', [itemID,name,description,location,country,buyPrice,firstBid,starts,ends,sellerUserId])
+
+
 
 def addUser(userID,rating,cur):
   # Purpose:                            Adds a use to the database
@@ -120,7 +126,7 @@ def addUser(userID,rating,cur):
 # END addUser
 
 def parseUser(dictionary,cur):
-  # Purpose:                    Parses in users
+  # Purpose:                    Parses in users, using addUser
   bids = dictionary.get("Bids")
   if bids != None:
     for bid in bids:
@@ -149,13 +155,12 @@ def parseCategory(dictionary,cur):
   # Purpose:                      Constructs a list of unique categories, then
   #                               links each item with its revevant category
   # First try and add all the relevant categories, if they aren't already
-  # in the database
+  # in the database, then match up the items to the categories
   for c in dictionary.get("Category"):
     cur.execute('''
       INSERT OR IGNORE INTO category (name)
       VALUES (?);
     ''', [c])
-    print(dictionary['ItemID'])
     cur.execute('''
       INSERT OR IGNORE INTO inCategory(itemID,catID)
       VALUES (?1,(SELECT catID FROM category WHERE name = ?2 LIMIT 1));
