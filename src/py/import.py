@@ -103,11 +103,14 @@ def parseItem(dictionary,cur):
   starts = transformDttm(dictionary["Started"])
   ends = transformDttm(dictionary["Ends"])
   sellerUserId = dictionary["Seller"]["UserID"]
+  currentPrice = transformDollar(dictionary["Currently"])
   cur.execute('''
     INSERT OR IGNORE INTO 'item' (itemID,name,description,location,country,
-                                  buyPrice,firstBid,starts,ends,sellerUserId)
-    VALUES (?,?,?,?,?,?,?,?,?,?);
-  ''', [itemID,name,description,location,country,buyPrice,firstBid,starts,ends,sellerUserId])
+                                  buyPrice,firstBid,starts,ends,sellerUserId,
+                                  currentPrice)
+    VALUES (?,?,?,?,?,?,?,?,?,?,?);
+  ''', [itemID,name,description,location,country,buyPrice,firstBid,starts,ends,
+        sellerUserId,currentPrice])
 
 
 

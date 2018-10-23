@@ -46,6 +46,7 @@ CREATE TABLE "item" (
   starts TEXT, --              auction start date/time
   ends INTEGER, --                auction end date/time
   sellerUserID TEXT, --            the seller of this item
+  currentPrice INTEGER,
   CONSTRAINT sellerUserID
   FOREIGN KEY(sellerUserID) REFERENCES "user"(userID)
 );
