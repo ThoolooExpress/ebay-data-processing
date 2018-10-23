@@ -16,6 +16,10 @@ Q3:
    	having count(itemID) = 4;
 	
 Q4:
+	select itemID
+   	from (
+   	select itemID, max(currentPrice) 
+   	from item);
 	
 	
 Q5:
