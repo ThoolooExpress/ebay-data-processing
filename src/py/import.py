@@ -213,6 +213,9 @@ def parseJson(json_file,cur):
 """
 Loops through each json files provided on the command line and passes each file
 to the parser
+
+R. G. M. 2018-11-25 Also sets current time to be a second after the data was
+exported from ebay
 """
 def main(argv):
 
@@ -228,6 +231,11 @@ def main(argv):
     if isJson(f):
       parseJson(f,cur)
       print("Success parsing " + f)
+  cur.execute("BEGIN TRANSACTION;")
+  #Magic number is the UNIX timestamp 1 second after data export time
+  cur.execute("INSERT INTO nowTime VALUES(1008806402);") # R.G.M. 2018-11-25
+  cur.execute("COMMIT;")
+  print ("Inserted start time")
 
 if __name__ == '__main__':
   main(sys.argv)

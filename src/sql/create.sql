@@ -24,6 +24,14 @@ DROP TABLE IF EXISTS "bids";
 DROP TABLE IF EXISTS "listing";
 DROP TABLE IF EXISTS "item";
 DROP TABLE IF EXISTS "user";
+DROP TABLE IF EXISTS "nowTime";
+
+-- R.G.M. 2018-11-25 Added nowTime table
+-- called nowTime B/C that avoids reserved words in pretty much every language
+
+CREATE TABLE "nowTime" (
+  time INTEGER -- "current" UNIX time
+);
 
 CREATE TABLE "user" (
   -- Stores each user
