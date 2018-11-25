@@ -232,10 +232,7 @@ def main(argv):
       parseJson(f,cur)
       print("Success parsing " + f)
   cur.execute("BEGIN TRANSACTION;")
-<<<<<<< HEAD
   #Magic number is the UNIX timestamp 1 second after data export time
-=======
->>>>>>> 52508ee7aa1b2503741cebeaffaab0214a4e8294
   cur.execute("INSERT INTO nowTime VALUES(1008806402);") # R.G.M. 2018-11-25
   cur.execute("COMMIT;")
   print ("Inserted start time")
