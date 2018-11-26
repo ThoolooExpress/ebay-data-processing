@@ -232,10 +232,13 @@ def main(argv):
       parseJson(f,cur)
       print("Success parsing " + f)
   cur.execute("BEGIN TRANSACTION;")
-  #Magic number is the UNIX timestamp 1 second after data export time
+  # Magic number is the UNIX timestamp 1 second after data export time
   cur.execute("INSERT INTO nowTime VALUES(1008806402);") # R.G.M. 2018-11-25
   cur.execute("COMMIT;")
   print ("Inserted start time")
+  # Enable Foriegn Keys (Doing this after import because otherwise it would be
+  # terrily slow)
+  cur.execute("PRAGMA foreign_keys = ON;")
 
 if __name__ == '__main__':
   main(sys.argv)

@@ -18,6 +18,10 @@
 --                        issues.  The conversion to decimal values must be
 --                        handled outside the database
 
+-- Disable foriegn keys, to avoid having to deal with conflicts while importing
+
+PRAGMA foriegn_keys = OFF;
+
 DROP TABLE IF EXISTS "inCategory";
 DROP TABLE IF EXISTS "category";
 DROP TABLE IF EXISTS "bids";
