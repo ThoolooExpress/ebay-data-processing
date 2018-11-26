@@ -6,28 +6,6 @@
 #                               handles users.  Will be extended to all fields
 #                               once it works for users
 
-# Comment Below is Prof's
-
-"""
-FILE: skeleton_parser.py
-------------------
-Skeleton parser for programming project 1. Has useful imports and
-functions for parsing, including:
-
-1) Directory handling -- the parser takes a list of eBay json files
-and opens each file inside of a loop. You just need to fill in the rest.
-2) Dollar value conversions -- the json files store dollar value amounts in
-a string like $3,453.23 -- we provide a function to convert it to a string
-like XXXXX.xx.
-3) Date/time conversions -- the json files store dates/ times in the form
-Mon-DD-YY HH:MM:SS -- we wrote a function (transformDttm) that converts to the
-for YYYY-MM-DD HH:MM:SS, which will sort chronologically in SQL.
-
-Your job is to implement the parseJson function, which is invoked on each file by
-the main function. We create the initial Python dictionary object of items for
-you; the rest is up to you!
-Happy parsing!
-"""
 
 import sys
 from json import loads
@@ -198,11 +176,6 @@ def parseJson(json_file,cur):
     items = loads(f.read())['Items']
     cur.execute("BEGIN TRANSACTION;") 
     for item in items:
-      """
-      TODO: traverse the items dictionary to extract information from the
-      given `json_file' and generate the necessary .dat files to generate
-      the SQL tables based on your relation design
-      """
       parseItem(item,cur)
       parseCategory(item, cur)
       parseUser(item, cur)
