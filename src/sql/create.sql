@@ -94,7 +94,7 @@ CREATE TABLE "bids" (
 
 CREATE TABLE "category" (
   -- Stores each category
-  name TEXT UNIQUE, --            the name of the category
+  name TEXT UNIQUE, --            the nam e of the category
   catID INTEGER PRIMARY KEY --    sqlite3 alias for ROWID
 );
 

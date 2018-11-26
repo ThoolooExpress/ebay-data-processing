@@ -212,6 +212,8 @@ def main(argv):
   # Enable Foriegn Keys (Doing this after import because otherwise it would be
   # terrily slow)
   cur.execute("PRAGMA foreign_keys = ON;")
+  # Enable triggers TODO: make the r function not break triggers
+  # r(cur, "../sql/maketriggers.sql")
 
 if __name__ == '__main__':
   main(sys.argv)
