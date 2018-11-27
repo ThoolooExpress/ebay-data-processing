@@ -59,6 +59,7 @@ CREATE TABLE "item" (
   ends INTEGER, --                auction end date/time
   sellerUserID TEXT, --            the seller of this item
   currentPrice INTEGER,
+  numBids INTEGER,
   CONSTRAINT sellerUserID
   FOREIGN KEY(sellerUserID) REFERENCES "user"(userID)
 );
