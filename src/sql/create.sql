@@ -82,8 +82,8 @@ CREATE TABLE "bids" (
   CONSTRAINT userID
   FOREIGN KEY (userID) REFERENCES "user"(userID),
 
-  PRIMARY KEY (userID,itemID,"time") -- A given user may only place one bid
-                                        -- on a given listing, at a given time,
+  PRIMARY KEY (userID,itemID)           -- A given user may only place one bid
+                                        -- on a given listing, at a given price
                                         -- hence this is our primary key
 
 -- Note:  A user could theoretically place multiple bids at the same time due to
