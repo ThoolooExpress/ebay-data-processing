@@ -57,3 +57,63 @@ WHEN new.time < (SELECT starts FROM item WHERE item.itemID = new.itemID) OR
 BEGIN
   SELECT RAISE(ROLLBACK, "Bids must be between the start and end times of the item");
 END;
+
+-- 12) No user can make a bid of the same amount to the same item more than once
+
+-- since currentPrice has been updated to be the highest bid, bid can't <= the currentPrice which will guarantee it won't equal a previous bid
+DROP TRIGGER IF EXISTS no_bid_same_amount;
+CREATE TRIGGER no_bid_same_amount;
+AFTER INSERT ON bids
+WHEN new.price <= currentPrice
+BEGIN
+	SELECT RAISE(ROLLBACK, “That bid has already been made or is less than the current highest bid! Choose a larger amount.”);
+END
+COMMIT;
+
+-- 13) In every auction, the Number of Bids attribute corresponds to the actual number of bids for that particular item
+
+-- we don't have a numberOfBids attribute?
+DROP TRIGGER IF EXISTS number_of_bids
+CREATE TRIGGER number_of_bids
+AFTER INSERT ON bids
+BEGIN
+	UPDATE item SET numberOfBids = (SELECT COUNT()
+					         FROM bids
+					         WHERE bids.itemID = new.itemID);
+END;
+COMMIT;
+
+-- 14) Any new bid for a particular item must have a higher amount than any of the previous bids for that particular item
+
+-- since currentPrice is the highest bid so far..
+DROP TRIGGER IF EXISTS new_bid_higher
+CREATE TRIGGER new_bid_higher
+AFTER INSERT ON bids
+WHEN currentPrice <= new.price
+BEGIN
+	SELECT RAISE(ROLLBACK, “This bid has to be higher than previous bids! Bid higher!”);
+END;
+COMMIT;
+
+-- 15) All new bids must be placed at the time which matches the current time of your auction
+
+DROP TRIGGER IF EXISTS new_bid_current_time
+CREATE TRIGGER new_bid_current_time
+AFTER INSERT ON bids
+WHEN new.time != bids.time  
+BEGIN
+	UPDATE item SET new.time = bid.time WHERE item.itemID = new.itemID;
+END;
+COMMIT;
+
+-- 16) The current time of your Auction Base system can only advance forward in time, not backward in time
+
+-- honestly so confused with this one.. bc it's the unix time - shouldn't it just naturally be increasing w/ real time?
+DROP TRIGGER IF EXISTS system_current_time
+CREATE TRIGGER system_current_time
+AFTER INSERT ON nowTime
+WHEN bids.time = new.time
+BEGIN
+	UPDATE nowTime SET new.time = (bid.time+1);
+END;
+COMMIT;
