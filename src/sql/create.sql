@@ -82,7 +82,7 @@ CREATE TABLE "bids" (
   CONSTRAINT userID
   FOREIGN KEY (userID) REFERENCES "user"(userID),
 
-  PRIMARY KEY (userID,itemID)           -- A given user may only place one bid
+  PRIMARY KEY (userID,itemID,price)     -- A given user may only place one bid
                                         -- on a given listing, at a given price
                                         -- hence this is our primary key
 

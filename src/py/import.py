@@ -198,9 +198,9 @@ def main(argv):
     sys.exit(1)
       # loops over all .json files in the argument
   # Initialize DB
-  conn = sqlite3.connect("../../tmp/ebay-data.db")
+  # R.G.M. changed db path, this script must now be run from project root
+  conn = sqlite3.connect("tmp/ebay-data.db")
   cur = conn.cursor()
-  r(cur,"../sql/create.sql")
   for f in argv[1:]:
     if isJson(f):
       parseJson(f,cur)
