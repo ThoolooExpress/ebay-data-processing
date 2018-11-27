@@ -48,7 +48,5 @@ sqlite3 tmp/ebay-data.db < src/sql/maketriggers.sql;
 echo "Triggers added.  Database is now ready for testing."
 
 echo "Database file is tmp/ebay-data.db";
-echo "Helper scripts are provided for testing, src/py/advanceTime.py and"
-echo "src/py/bid.py"
 
 echo "All triggers can be dropped with the src/sql/dropTriggers.sql file"
