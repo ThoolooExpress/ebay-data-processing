@@ -96,7 +96,10 @@ BEGIN
 	UPDATE item SET numBids = (
           SELECT COUNT()
 				  FROM bids
-			    WHERE bids.itemID = new.itemID);
+			    WHERE bids.itemID = new.itemID)
+  -- R.G.M. The outer where is necessary, because otherwise we'd be setting
+  -- every item to the number of bids of the new item
+  WHERE item.itemID = new.itemID;
 END;
 
 
