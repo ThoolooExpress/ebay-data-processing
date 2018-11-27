@@ -1,8 +1,25 @@
 -- Purpose:                         Declares all our triggers
 
+BEGIN TRANSACTION;
+-- 6) The items for a given category must exist, so when items are removed
+--    from inCategory, remove their corrosponding category if it was the last
+--    item
+
+DROP TRIGGER IF EXISTS unused_category;
+CREATE TRIGGER unused_category
+AFTER DELETE ON inCategory
+WHEN NOT EXISTS (
+  SELECT *
+  FROM inCategory
+  WHERE catID = old.catID
+)
+BEGIN
+  DELETE
+  FROM category
+  WHERE catID = old.catID;
+END;
 -- 7) Auction end must always be after auction start
 
-BEGIN TRANSACTION;
 DROP TRIGGER IF EXISTS auction_end_after_start;
 CREATE TRIGGER auction_end_after_start
 AFTER INSERT ON item
@@ -30,7 +47,6 @@ WHEN new.userID = (SELECT sellerUserID FROM item WHERE item.itemID = new.itemID 
 BEGIN
   SELECT RAISE(ROLLBACK, "A seller may not bid on their own item!");
 END;
-COMMIT;
 
 -- 10) An auction may not have two bids at the exact same time
 
@@ -68,7 +84,7 @@ WHEN new.price <= currentPrice
 BEGIN
 	SELECT RAISE(ROLLBACK, “That bid has already been made or is less than the current highest bid! Choose a larger amount.”);
 END
-COMMIT;
+
 
 -- 13) In every auction, the Number of Bids attribute corresponds to the actual number of bids for that particular item
 
@@ -81,7 +97,7 @@ BEGIN
 					         FROM bids
 					         WHERE bids.itemID = new.itemID);
 END;
-COMMIT;
+
 
 -- 14) Any new bid for a particular item must have a higher amount than any of the previous bids for that particular item
 
@@ -93,7 +109,7 @@ WHEN currentPrice <= new.price
 BEGIN
 	SELECT RAISE(ROLLBACK, “This bid has to be higher than previous bids! Bid higher!”);
 END;
-COMMIT;
+
 
 -- 15) All new bids must be placed at the time which matches the current time of your auction
 
@@ -104,7 +120,7 @@ WHEN new.time != bids.time
 BEGIN
 	UPDATE item SET new.time = bid.time WHERE item.itemID = new.itemID;
 END;
-COMMIT;
+
 
 -- 16) The current time of your Auction Base system can only advance forward in time, not backward in time
 
@@ -116,4 +132,5 @@ WHEN bids.time = new.time
 BEGIN
 	UPDATE nowTime SET new.time = (bid.time+1);
 END;
+
 COMMIT;
