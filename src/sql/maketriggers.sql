@@ -103,9 +103,9 @@ BEGIN
 END;
 
 
--- 14) Any new bid for a particular item must have a higher amount than any of the previous bids for that particular item
-
--- since currentPrice is the highest bid so far..
+-- 14) Any new bid for a particular item must have a higher amount than any of
+-- the previous bids for that particular item since currentPrice is the highest
+-- bid so far..
 DROP TRIGGER IF EXISTS new_bid_higher;
 CREATE TRIGGER new_bid_higher
 AFTER INSERT ON bids
@@ -130,9 +130,9 @@ BEGIN
 END;
 
 
--- 16) The current time of your Auction Base system can only advance forward in time, not backward in time
+-- 16) The current time of your Auction Base system can only advance forward in
+-- time, not backward in time
 
--- honestly so confused with this one.. bc it's the unix time - shouldn't it just naturally be increasing w/ real time?
 DROP TRIGGER IF EXISTS system_current_time;
 CREATE TRIGGER system_current_time
 AFTER UPDATE ON nowTime
@@ -141,4 +141,13 @@ BEGIN
 	SELECT RAISE(ROLLBACK, "nowTime must always be advanced with updates!");
 END;
 
+-- Extra trigger, makes sure that nowTime never has more than one row
+
+DROP TRIGGER IF EXISTS now_time_one_row;
+CREATE TRIGGER now_time_one_row
+AFTER INSERT ON nowTime
+WHEN (SELECT COUNT() FROM nowTime) > 1
+BEGIN
+  SELECT RAISE(ROLLBACK, "nowTime may never have more than one row!");
+END;
 COMMIT;
