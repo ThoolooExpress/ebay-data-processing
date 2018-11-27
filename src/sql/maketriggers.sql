@@ -75,61 +75,67 @@ BEGIN
 END;
 
 -- 12) No user can make a bid of the same amount to the same item more than once
-
--- since currentPrice has been updated to be the highest bid, bid can't <= the currentPrice which will guarantee it won't equal a previous bid
-DROP TRIGGER IF EXISTS no_bid_same_amount;
-CREATE TRIGGER no_bid_same_amount;
-AFTER INSERT ON bids
-WHEN new.price <= currentPrice
-BEGIN
-	SELECT RAISE(ROLLBACK, “That bid has already been made or is less than the current highest bid! Choose a larger amount.”);
-END
+-- R.G.M. This trigger was replaced by a modification to the primary key of the
+-- bids table... sorry Liz...
+-- -- since currentPrice has been updated to be the highest bid, bid can't <= the currentPrice which will guarantee it won't equal a previous bid
+-- DROP TRIGGER IF EXISTS no_bid_same_amount;
+-- CREATE TRIGGER no_bid_same_amount;
+-- AFTER INSERT ON bids
+-- WHEN new.price <= (SELECT currentPrice FROM item WHERE )
+-- BEGIN
+-- 	SELECT RAISE(ROLLBACK, “That bid has already been made or is less than the current highest bid! Choose a larger amount.”);
+-- END
 
 
 -- 13) In every auction, the Number of Bids attribute corresponds to the actual number of bids for that particular item
 
-DROP TRIGGER IF EXISTS number_of_bids
+DROP TRIGGER IF EXISTS number_of_bids;
 CREATE TRIGGER number_of_bids
 AFTER INSERT ON bids
 BEGIN
-	UPDATE item SET numBids = (SELECT COUNT()
-				   FROM bids
-			           WHERE bids.itemID = new.itemID);
+	UPDATE item SET numBids = (
+          SELECT COUNT()
+				  FROM bids
+			    WHERE bids.itemID = new.itemID);
 END;
 
 
 -- 14) Any new bid for a particular item must have a higher amount than any of the previous bids for that particular item
 
 -- since currentPrice is the highest bid so far..
-DROP TRIGGER IF EXISTS new_bid_higher
+DROP TRIGGER IF EXISTS new_bid_higher;
 CREATE TRIGGER new_bid_higher
 AFTER INSERT ON bids
-WHEN currentPrice <= new.price
+-- WHEN currentPrice <= new.price -- R.G.M. What is currentPrice?  The database
+-- engine doesn't know which item we're referring to unless we write a query to
+-- tell it
+-- New version:
+WHEN new.price <= (SELECT currentPrice FROM item WHERE itemID = new.itemID)
 BEGIN
-	SELECT RAISE(ROLLBACK, “This bid has to be higher than previous bids! Bid higher!”);
+	SELECT RAISE(ROLLBACK, "This bid has to be higher than previous bids! Bid higher!");
 END;
 
 
 -- 15) All new bids must be placed at the time which matches the current time of your auction
 
-DROP TRIGGER IF EXISTS new_bid_current_time
+DROP TRIGGER IF EXISTS new_bid_current_time;
 CREATE TRIGGER new_bid_current_time
 AFTER INSERT ON bids
-WHEN new.time != bids.time  
+WHEN new.time <> (SELECT "time" FROM nowTime)
 BEGIN
-	UPDATE item SET new.time = bid.time WHERE item.itemID = new.itemID;
+	SELECT RAISE(ROLLBACK, "Bids must be made at current time!");
 END;
 
 
 -- 16) The current time of your Auction Base system can only advance forward in time, not backward in time
 
 -- honestly so confused with this one.. bc it's the unix time - shouldn't it just naturally be increasing w/ real time?
-DROP TRIGGER IF EXISTS system_current_time
+DROP TRIGGER IF EXISTS system_current_time;
 CREATE TRIGGER system_current_time
-AFTER INSERT ON nowTime
-WHEN bids.time = new.time
+AFTER UPDATE ON nowTime
+WHEN old.time >= new.time
 BEGIN
-	UPDATE nowTime SET new.time = (bid.time+1);
+	SELECT RAISE(ROLLBACK, "nowTime must always be advanced with updates!");
 END;
 
 COMMIT;
