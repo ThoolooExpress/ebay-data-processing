@@ -31,3 +31,29 @@ BEGIN
   SELECT RAISE(ROLLBACK, "A seller may not bid on their own item!");
 END;
 COMMIT;
+
+-- 10) An auction may not have two bids at the exact same time
+
+DROP TRIGGER IF EXISTS bids_time_match;
+CREATE TRIGGER bids_time_match
+AFTER INSERT ON bids
+WHEN (
+  SELECT COUNT()
+  FROM bids
+  WHERE bids.itemID = new.itemID
+  AND bids.time = new.time
+) > 1
+BEGIN
+  SELECT RAISE(ROLLBACK, "No two bids may be submitted on the same item at the same time.");
+END;
+
+-- 11) Bids must be within the item's start and end times
+
+DROP TRIGGER IF EXISTS bids_in_auction_time;
+CREATE TRIGGER bids_in_auction_time
+AFTER INSERT ON bids
+WHEN new.time < (SELECT starts FROM item WHERE item.itemID = new.itemID) OR
+     new.time > (SELECT ends FROM item WHERE item.itemID = new.itemID)
+BEGIN
+  SELECT RAISE(ROLLBACK, "Bids must be between the start and end times of the item");
+END;
