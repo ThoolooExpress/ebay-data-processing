@@ -18,6 +18,25 @@ BEGIN
   FROM category
   WHERE catID = old.catID;
 END;
+
+-- Duplicate version for updates (B/C sqlite sux, we have to acutally copy-paste
+-- code to make this work)
+
+DROP TRIGGER IF EXISTS unused_category_update;
+CREATE TRIGGER unused_category_update
+AFTER UPDATE ON inCategory
+WHEN NOT EXISTS (
+  SELECT *
+  FROM inCategory
+  WHERE catID = old.catID
+)
+BEGIN
+  DELETE
+  FROM category
+  WHERE catID = old.catID;
+END;
+
+
 -- 7) Auction end must always be after auction start
 
 DROP TRIGGER IF EXISTS auction_end_after_start;
@@ -36,6 +55,16 @@ CREATE TRIGGER raise_current_price
 AFTER INSERT ON bids
 BEGIN
   UPDATE item SET currentPrice = new.price WHERE item.itemID = new.itemID;
+END;
+
+-- Bids shouldn't be updated, this makes sense, and also obviates the need to
+-- handle like 5 edge cases
+
+DROP TRIGGER IF EXISTS no_bid_update;
+CREATE TRIGGER no_bid_update
+AFTER UPDATE ON bids
+BEGIN
+  SELECT RAISE(ROLLBACK,"All bids are final!");
 END;
 
 -- 9) A user may not bid on an item they are selling
@@ -151,3 +180,14 @@ BEGIN
   SELECT RAISE(ROLLBACK, "nowTime may never have more than one row!");
 END;
 COMMIT;
+
+-- Extra trigger, keeps us from shooting ourselves in the feet by deleting the
+-- time
+
+DROP TRIGGER IF EXISTS now_time_delete;
+CREATE TRIGGER now_time_delete
+AFTER DELETE ON nowTime
+WHEN (SELECT COUNT() FROM nowTime) < 1
+BEGIN
+  SELECT RAISE(ROLLBACK, "Deleting time will result in a ton of other errors!");
+END;

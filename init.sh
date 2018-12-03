@@ -43,7 +43,7 @@ fi
 
 echo "Data passed integrity checks, now adding triggers";
 
-sqlite3 tmp/ebay-data.db < src/sql/maketriggers.sql;
+sqlite3 tmp/ebay-data.db < src/sql/makeTriggers.sql;
 
 echo "Triggers added.  Database is now ready for testing."
 
