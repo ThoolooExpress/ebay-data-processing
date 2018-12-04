@@ -2,9 +2,7 @@
 # Purpose:                      imports the JSON files into the database
 # Note:                         partially based on prof's code
 
-# Current Status:               R. G. M. 2018-10-20 Currently only actually
-#                               handles users.  Will be extended to all fields
-#                               once it works for users
+# Current Status:               R.G.M. 2018-12-24 Fully functional
 
 
 import sys

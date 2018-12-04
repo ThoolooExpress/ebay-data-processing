@@ -97,7 +97,7 @@ for idx, s in enumerate(conds):
 queryString += ";"
 
 # For debug only
-print(queryString)
+# print(queryString)
 
 # Prettify output
 
