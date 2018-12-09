@@ -84,21 +84,29 @@ if args.open:
 if args.closed:
   conds.append("ends > (SELECT time FROM nowTime")
 
-queryString = '''SELECT itemID, SUBSTR(name,0,30),SUBSTR(location,0,20),country,buyPrice,
-                     firstBid,starts,ends,sellerUserID,currentPrice,numBids 
+queryString = '''SELECT itemID AS "Item ID",
+                        SUBSTR(name,0,30) AS Title,
+                        SUBSTR(location,0,20) AS Location,
+                        country AS Country,
+                        PRINTF("$%.2f",buyPrice/100.0) AS "Buy it Now",
+                        PRINTF("$%.2f",currentPrice/100.0) AS "Current Price",
+                        numBids AS Bids,
+                        datetime(starts, 'unixepoch', 'localtime') AS "Start Time",
+                        datetime(ends, 'unixepoch', 'localtime') AS "End Time",
+                        SUBSTR(sellerUserID,0,10) AS Seller
                      FROM item WHERE '''
 
+# Put all the conditions together
 for idx, s in enumerate(conds):
   if idx != 0:
     queryString += " AND "
-
   queryString += s
-
-queryString += ";"
+queryString += " ORDER BY ends ASC;"
 
 # For debug only
 # print(queryString)
 
 # Prettify output
+# Print the table
 
 print(from_db_cursor(cur.execute(queryString)))
