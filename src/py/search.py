@@ -5,6 +5,23 @@ import argparse
 import sqlite3
 from prettytable import from_db_cursor
 
+def isInt(s):
+  # Purpose:        Helper function to keep try-excepts contained
+    try: 
+        int(s)
+        return True
+    except ValueError:
+        return False
+
+def parseDollar(arg):
+  # Purpose:        Converts any user input dollar ammount into an integer
+  #                 number of cents
+  if isInt(arg):
+    return int(arg)
+  return int(arg.replace("$","").replace(",","").replace(".",""))
+
+
+
 # def printQuery(itemID=None,category=None,descQuery=None,
 #   minPrice=None,maxPrice=None,onlyOpen=False,onlyClosed=False):
 #   #Purpsoed:              Prints out a search query to test the argument parser
@@ -40,7 +57,8 @@ parser.add_argument("--minPrice",
 parser.add_argument("--maxPrice",
                     type=str,
                     help="The maximum price (Format as either the (integer) number "
-                    "of cents, or as $XXX.xx, number of digits irrelevant)")
+                    "of cents, or as XXX.xx (BASH WILL GLITCH IF YOU INCLUDE "
+                    "DOLLAR SIGNS), number of digits irrelevant")
 parser.add_argument("--open",
                     action="store_true",
                     help="Restrict search to only open auctions")
@@ -73,10 +91,10 @@ if args.descQuery:
   conds.append("description LIKE '%{descQuery}%'".format(descQuery =  args.descQuery))
 
 if args.minPrice:
-  conds.append("currentPrice >= {minPrice}".format(minPrice = args.minPrice))
+  conds.append("currentPrice >= {minPrice}".format(minPrice = parseDollar(args.minPrice)))
 
 if args.maxPrice:
-  conds.append("currentPrice <= {maxPrice}".format(maxPrice = args.maxPrice))
+  conds.append("currentPrice <= {maxPrice}".format(maxPrice = parseDollar(args.maxPrice)))
 
 if args.open:
   conds.append("ends < (SELECT time FROM nowTime)")
